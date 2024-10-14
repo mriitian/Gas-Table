@@ -215,7 +215,7 @@ function osr(form) {
 
 function osrDelta(M1, gamma, delta, form){
      // Turn angle in degrees
-    delta = delta * Math.PI / 180;        // Convert delta to radians
+    delta = delta * Math.PI / 180;     
 
     // Find the weak shock wave angle beta using Newton-Raphson method
     function f_beta(beta) {
@@ -247,7 +247,7 @@ function osrDelta(M1, gamma, delta, form){
         iteration++;
     }
 
-    // Convert beta back to degrees for output
+
     let beta_deg = beta * 180 / Math.PI;
     
     // Normal Mach number before the shock
@@ -273,19 +273,19 @@ function osrDelta(M1, gamma, delta, form){
 
     // Set the calculated values to the form fields
     form.m2.value = M2.toFixed(5);
-    form.delta.value = (delta * 180 / Math.PI).toFixed(5); // Turn angle (in degrees)
-    form.beta.value = beta_deg.toFixed(5);                 // Wave angle (in degrees)
-    form.p2p1.value = p2p1.toFixed(5);                     // p2/p1
-    form.r2r1.value = r2r1.toFixed(5);                     // rho2/rho1
-    form.t2t1.value = t2t1.toFixed(5);                     // T2/T1
-    form.p02p01.value = p02p01.toFixed(5);                 // p02/p01
-    form.m1n.value = M1n.toFixed(5);                       // M1n
-    form.m2n.value = M2n.toFixed(5);                       // M2n
+    form.delta.value = (delta * 180 / Math.PI).toFixed(5); 
+    form.beta.value = beta_deg.toFixed(5);                 
+    form.p2p1.value = p2p1.toFixed(5);                     
+    form.r2r1.value = r2r1.toFixed(5);                     
+    form.t2t1.value = t2t1.toFixed(5);                     
+    form.p02p01.value = p02p01.toFixed(5);                 
+    form.m1n.value = M1n.toFixed(5);                       
+    form.m2n.value = M2n.toFixed(5);                       
 }
 
 function osrStrongDelta(M1, gamma, delta, form) {
     // Turn angle in degrees
-    delta = delta * Math.PI / 180;  // Convert delta to radians
+    delta = delta * Math.PI / 180;
 
     // Find the strong shock wave angle beta using Newton-Raphson method
     function f_beta(beta) {
@@ -294,13 +294,13 @@ function osrStrongDelta(M1, gamma, delta, form) {
 
     // Numerical derivative of f(beta)
     function f_prime_beta(beta) {
-        let delta_beta = 0.0001; // Small change in beta
+        let delta_beta = 0.0001;
         return (f_beta(beta + delta_beta) - f_beta(beta)) / delta_beta;
     }
 
     // Newton-Raphson to solve for beta (wave angle)
     // Initial guess for beta is larger for the strong shock
-    let beta = Math.PI / 2;  // Start closer to 90 degrees (in radians) for strong shock
+    let beta = Math.PI / 2;
     let tolerance = 0.00001;
     let maxIterations = 100;
     let iteration = 0;
@@ -326,7 +326,7 @@ function osrStrongDelta(M1, gamma, delta, form) {
 
     // Mach number after the shock using normal shock relations
     let M2n = Math.sqrt(((gamma - 1) * M1n * M1n + 2) / (2 * gamma * M1n * M1n - (gamma - 1)));
-    let M2 = M2n / Math.sin(beta - delta); // Oblique shock relation for M2
+    let M2 = M2n / Math.sin(beta - delta); 
 
     // Pressure ratio across the shock
     let p2p1 = 1 + (2 * gamma / (gamma + 1)) * (M1n * M1n - 1);
@@ -344,12 +344,12 @@ function osrStrongDelta(M1, gamma, delta, form) {
 
     // Set the calculated values to the form fields
     form.m2.value = M2.toFixed(5);
-    form.delta.value = (delta * 180 / Math.PI).toFixed(5); // Turn angle (in degrees)
-    form.beta.value = beta_deg.toFixed(5);                 // Wave angle (in degrees)
-    form.p2p1.value = p2p1.toFixed(5);                     // p2/p1
-    form.r2r1.value = r2r1.toFixed(5);                     // rho2/rho1
-    form.t2t1.value = t2t1.toFixed(5);                     // T2/T1
-    form.p02p01.value = p02p01.toFixed(5);                 // p02/p01
-    form.m1n.value = M1n.toFixed(5);                       // M1n
-    form.m2n.value = M2n.toFixed(5);                       // M2n
+    form.delta.value = (delta * 180 / Math.PI).toFixed(5);
+    form.beta.value = beta_deg.toFixed(5);                
+    form.p2p1.value = p2p1.toFixed(5);                    
+    form.r2r1.value = r2r1.toFixed(5);                    
+    form.t2t1.value = t2t1.toFixed(5);                    
+    form.p02p01.value = p02p01.toFixed(5);               
+    form.m1n.value = M1n.toFixed(5);                      
+    form.m2n.value = M2n.toFixed(5);                      
 }
