@@ -61,7 +61,6 @@ function isentMach(value, gamma, form) {
             aas = (1 / mach) * Math.pow(((1 / term) * ((1 + ((gamma - 1) / 2) * mach * mach))), (gamma + 1) / (2 * (gamma - 1)));    
         }
         
-        // Update form fields with the computed values
         form.m.value = mach.toFixed(5);
         form.tt0.value = tt0.toFixed(5);
         form.pp0.value = pp0.toFixed(5);
@@ -129,12 +128,11 @@ function nsrMach(mach1, form, gamma){
 
 function nsrMachFromTemperature(t2t1, form, gamma) {
     let m1 = 1; // Initial guess
-    let tolerance = 0.00001;
+    let epsilon = 0.00001;
     let maxIterations = 1000;
     let iteration = 0;
     let f, f_prime, m1_next;
 
-    // Define the function f(m1) = T2/T1 expression minus the target value
     function f_m1(m1) {
         return ((2 * gamma * m1 * m1 - (gamma - 1)) * (2 + (gamma - 1) * m1 * m1)) / ((gamma + 1) * (gamma + 1) * m1 * m1) - t2t1;
     }
@@ -147,21 +145,19 @@ function nsrMachFromTemperature(t2t1, form, gamma) {
         return (numerator1 + numerator2) / denominator;
     }
 
-    // Newton-Raphson iteration
     while (iteration < maxIterations) {
         f = f_m1(m1);
         f_prime = f_prime_m1(m1);
         m1_next = m1 - f / f_prime;
 
-        if (Math.abs(m1_next - m1) < tolerance) {
-            break; // Stop if the change is smaller than tolerance
+        if (Math.abs(m1_next - m1) < epsilon) {
+            break;
         }
 
         m1 = m1_next;
         iteration++;
     }
 
-    // Display the Mach number result
     return m1
 }
 
@@ -169,9 +165,9 @@ function nsrMachFromTemperature(t2t1, form, gamma) {
 function osr(form) {
     // Input values
     let gamma = parseFloat(form.g.value); // Gamma (specific heat ratio)
-    let M1 = parseFloat(form.m.value);    // M1 (upstream Mach number)
+    let M1 = parseFloat(form.m.value);   
     let value = parseFloat(form.a.value);
-    const inputType = form.i.value; // Get the input type selected
+    const inputType = form.i.value;
 
     if(inputType == "Turn angle (weak shock)"){
         let delta = value
@@ -183,30 +179,24 @@ function osr(form) {
         let beta = value
         let betaRad = beta * Math.PI / 180;
     
-        // Compute the terms of the equation
-        let term1 = 2 * (1 / Math.tan(betaRad)); // 2 * cot(beta)
-        let term2 = (M1 * M1 * (gamma + Math.cos(2 * betaRad)) + 2); // M1^2 * (gamma + cos(2*beta)) + 2
-        let term3 = (M1 * M1 * Math.sin(betaRad) * Math.sin(betaRad) - 1); // M1^2 * sin^2(beta) - 1
+        let term1 = 2 * (1 / Math.tan(betaRad));
+        let term2 = (M1 * M1 * (gamma + Math.cos(2 * betaRad)) + 2); 
+        let term3 = (M1 * M1 * Math.sin(betaRad) * Math.sin(betaRad) - 1); 
     
-        // Final formula for tan(delta)
         let tan_delta = term1 * (term3 / term2);
     
-        // Convert delta back to degrees
         let delta = Math.atan(tan_delta) * 180/ Math.PI;
         console.log(delta)
         osrDelta(M1, gamma, delta, form)
     } else if(inputType == "M1n") {
         let betaRad = Math.asin(value / M1) 
 
-        // Compute the terms of the equation
-        let term1 = 2 * (1 / Math.tan(betaRad)); // 2 * cot(beta)
-        let term2 = (M1 * M1 * (gamma + Math.cos(2 * betaRad)) + 2); // M1^2 * (gamma + cos(2*beta)) + 2
-        let term3 = (M1 * M1 * Math.sin(betaRad) * Math.sin(betaRad) - 1); // M1^2 * sin^2(beta) - 1
+        let term1 = 2 * (1 / Math.tan(betaRad));
+        let term2 = (M1 * M1 * (gamma + Math.cos(2 * betaRad)) + 2);
+        let term3 = (M1 * M1 * Math.sin(betaRad) * Math.sin(betaRad) - 1);
     
-        // Final formula for tan(delta)
         let tan_delta = term1 * (term3 / term2);
     
-        // Convert delta back to degrees
         let delta = Math.atan(tan_delta) * 180/ Math.PI;
         console.log(delta)
         osrDelta(M1, gamma, delta, form)
@@ -214,23 +204,20 @@ function osr(form) {
 }
 
 function osrDelta(M1, gamma, delta, form){
-     // Turn angle in degrees
     delta = delta * Math.PI / 180;     
 
-    // Find the weak shock wave angle beta using Newton-Raphson method
     function f_beta(beta) {
         return Math.tan(delta) - 2 * (1 / Math.tan(beta)) * ((M1 * M1 * Math.sin(beta) * Math.sin(beta) - 1) / (M1 * M1 * (gamma + Math.cos(2 * beta)) + 2));
     }
 
-    // Numerical derivative of f(beta)
     function f_prime_beta(beta) {
-        let delta_beta = 0.0001; // Small change in beta
-        return (f_beta(beta + delta_beta) - f_beta(beta)) / delta_beta;
+        let deltaBeta = 0.0001; 
+        return (f_beta(beta + deltaBeta) - f_beta(beta)) / deltaBeta;
     }
 
     // Newton-Raphson to solve for beta (wave angle)
-    let beta = delta; // Initial guess for beta is the turn angle
-    let tolerance = 0.00001;
+    let beta = delta; 
+    let epsilon = 0.00001;
     let maxIterations = 100;
     let iteration = 0;
     while (iteration < maxIterations) {
@@ -238,7 +225,7 @@ function osrDelta(M1, gamma, delta, form){
         let f_prime = f_prime_beta(beta);
         let beta_next = beta - f / f_prime;
 
-        if (Math.abs(beta_next - beta) < tolerance) {
+        if (Math.abs(beta_next - beta) < epsilon) {
             beta = beta_next;
             break;
         }
@@ -250,28 +237,19 @@ function osrDelta(M1, gamma, delta, form){
 
     let beta_deg = beta * 180 / Math.PI;
     
-    // Normal Mach number before the shock
     let M1n = M1 * Math.sin(beta);
 
-    // Mach number after the shock using normal shock relations
     let M2n = Math.sqrt(((gamma - 1) * M1n * M1n + 2) / (2 * gamma * M1n * M1n - (gamma - 1)));
     let M2 = M2n / Math.sin(beta - delta); // Oblique shock relation for M2
 
-    // Pressure ratio across the shock
     let p2p1 = 1 + (2 * gamma / (gamma + 1)) * (M1n * M1n - 1);
-
-    // Density ratio across the shock
     let r2r1 = ((gamma + 1) * M1n * M1n) / ((gamma - 1) * M1n * M1n + 2);
-
-    // Temperature ratio across the shock
     let t2t1 = p2p1 / r2r1;
 
-    // Total pressure ratio across the shock
     let term1 = Math.pow(((gamma + 1) / 2) * M1n * M1n / (1 + ((gamma - 1) / 2) * M1n * M1n), gamma / (gamma - 1));
     let term2 = Math.pow((2 * gamma * M1n * M1n - (gamma - 1)) / (gamma + 1), -1 / (gamma - 1));
     let p02p01 = term1 * term2;
 
-    // Set the calculated values to the form fields
     form.m2.value = M2.toFixed(5);
     form.delta.value = (delta * 180 / Math.PI).toFixed(5); 
     form.beta.value = beta_deg.toFixed(5);                 
@@ -284,7 +262,6 @@ function osrDelta(M1, gamma, delta, form){
 }
 
 function osrStrongDelta(M1, gamma, delta, form) {
-    // Turn angle in degrees
     delta = delta * Math.PI / 180;
 
     // Find the strong shock wave angle beta using Newton-Raphson method
@@ -292,16 +269,14 @@ function osrStrongDelta(M1, gamma, delta, form) {
         return Math.tan(delta) - 2 * (1 / Math.tan(beta)) * ((M1 * M1 * Math.sin(beta) * Math.sin(beta) - 1) / (M1 * M1 * (gamma + Math.cos(2 * beta)) + 2));
     }
 
-    // Numerical derivative of f(beta)
     function f_prime_beta(beta) {
         let delta_beta = 0.0001;
         return (f_beta(beta + delta_beta) - f_beta(beta)) / delta_beta;
     }
 
     // Newton-Raphson to solve for beta (wave angle)
-    // Initial guess for beta is larger for the strong shock
     let beta = Math.PI / 2;
-    let tolerance = 0.00001;
+    let epsilon = 0.00001;
     let maxIterations = 100;
     let iteration = 0;
     while (iteration < maxIterations) {
@@ -309,7 +284,7 @@ function osrStrongDelta(M1, gamma, delta, form) {
         let f_prime = f_prime_beta(beta);
         let beta_next = beta - f / f_prime;
 
-        if (Math.abs(beta_next - beta) < tolerance) {
+        if (Math.abs(beta_next - beta) < epsilon) {
             beta = beta_next;
             break;
         }
@@ -318,31 +293,23 @@ function osrStrongDelta(M1, gamma, delta, form) {
         iteration++;
     }
 
-    // Convert beta back to degrees for output
     let beta_deg = beta * 180 / Math.PI;
 
-    // Normal Mach number before the shock
     let M1n = M1 * Math.sin(beta);
 
-    // Mach number after the shock using normal shock relations
     let M2n = Math.sqrt(((gamma - 1) * M1n * M1n + 2) / (2 * gamma * M1n * M1n - (gamma - 1)));
     let M2 = M2n / Math.sin(beta - delta); 
 
-    // Pressure ratio across the shock
     let p2p1 = 1 + (2 * gamma / (gamma + 1)) * (M1n * M1n - 1);
 
-    // Density ratio across the shock
     let r2r1 = ((gamma + 1) * M1n * M1n) / ((gamma - 1) * M1n * M1n + 2);
 
-    // Temperature ratio across the shock
     let t2t1 = p2p1 / r2r1;
 
-    // Total pressure ratio across the shock
     let term1 = Math.pow(((gamma + 1) / 2) * M1n * M1n / (1 + ((gamma - 1) / 2) * M1n * M1n), gamma / (gamma - 1));
     let term2 = Math.pow((2 * gamma * M1n * M1n - (gamma - 1)) / (gamma + 1), -1 / (gamma - 1));
     let p02p01 = term1 * term2;
 
-    // Set the calculated values to the form fields
     form.m2.value = M2.toFixed(5);
     form.delta.value = (delta * 180 / Math.PI).toFixed(5);
     form.beta.value = beta_deg.toFixed(5);                
